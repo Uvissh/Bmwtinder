@@ -30,7 +30,7 @@ const userSchema  = mongoose.Schema({
         required:true,
         validate(value){
             if(!validator.isStrongPassword(value)){
-                throw new Error("invlaid email address" + value);
+                throw new Error("invlaid password" + value);
             }
         },
     },
