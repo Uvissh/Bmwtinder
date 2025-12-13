@@ -49,7 +49,7 @@ app.post("/login",async(req,res)=>{
         const isPasswordValid  = await bcrypt.compare(password,user.password);
         if(isPasswordValid){
             //  create  a token jwt 
-            const token = await jwt.sign({_id:user._id},"bhateria@12345");
+            const token = await user.getJWT();
             console.log(token);
             
 
@@ -70,7 +70,7 @@ app.get("/profile",userAuth,async(req,res)=>{
   
 const user = req.user;
 
-res.send(user);
+res.send(user); 
 
   
     
@@ -79,6 +79,14 @@ res.send(user);
    }catch(err){
     res.status(400).send("Error:" + err.message);
    }
+})
+app.post("/sendConnectionRequest",userAuth,async(req,res)=>{
+    const user = req.user;
+
+    console.log("sending a connection request");
+
+    res.send(user.firstName + "sent the connection request");
+
 })
 app.get("/user",async(req,res)=>{
     const userEmail = req.body.emailId;
