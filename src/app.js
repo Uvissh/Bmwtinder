@@ -2,160 +2,48 @@ const express = require("express");
  const connectDB = require("./config/database");
 const User = require("./models/user");
 const app = express();
-const{validatorSignUpData} = require("./utils/validation")
-const bcrypt = require("bcrypt");
+
+
+
+
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
-
-const {userAuth} = require("./middleware/auth");
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestsRouter = require("./routes/requests");
 
 app.use(express.json());
 app.use(cookieParser());
 
 
-
-app.post("/signup",async(req,res)=>{
-    // console.log(req.body);
-        try{
-            //validation of the data
-            validatorSignUpData(req);
-            const {firstName,lastName,emailId,password} = req.body;
- 
-            //encrypttion of the data
-            const passwordHash =  await bcrypt.hash(password,10);
-
-
-    const user = new User({
-        firstName,
-        lastName,
-        emailId,
-        password : passwordHash,
-    });
-
-        await user.save();
-        res.send("user Added successfully!");
-    }catch(err){
-        res.status(400).send("Error saving the user"+err.message);
-    }
-});
-app.post("/login",async(req,res)=>{
-    try{
-        const {emailId, password} = req.body;
-        const user = await User.findOne({emailId : emailId});
-        if(!user){
-            throw new Error("Invalid credentilas");
-        }
-       
-        const isPasswordValid  = await bcrypt.compare(password,user.password);
-        if(isPasswordValid){
-            //  create  a token jwt 
-            const token = await user.getJWT();
-            console.log(token);
-            
-
-            res.cookie("token",token);
-            res.send("Login Successful!!!");
-
-        }else{
-            throw new Error("Invalid credentials");
-        }
-         
-    }catch(err){
-        res.status(400).send("Error :" + err.message);
-    }
-})
-
-app.get("/profile",userAuth,async(req,res)=>{
-   try{
-  
-const user = req.user;
-
-res.send(user); 
-
-  
-    
-   
-
-   }catch(err){
-    res.status(400).send("Error:" + err.message);
-   }
-})
-app.post("/sendConnectionRequest",userAuth,async(req,res)=>{
-    const user = req.user;
-
-    console.log("sending a connection request");
-
-    res.send(user.firstName + "sent the connection request");
-
-})
-app.get("/user",async(req,res)=>{
-    const userEmail = req.body.emailId;
-
-    try{
-        const users = await User.find({emailId:userEmail});
-        if(users.length ===0){
-            res.status(404).send("User not found");
-        }else{
-            res.send(users);
-        }
-    }catch(err){
-        res.status(400).send("Something went wrong");
-    }
-});
-app.get("/feed",async(req,res)=>{
-    try{
-        const users = await User.find({});//it all the users
-        res.send(users);
-
-    }catch(err){
-        res.status(400).send("something went wrong");
-    }
-})
-app.delete("/delete",async(req,res)=>{
-
-    const userId =  req.body.userId;
-    try{
-        const user = await User.findByIdAndDelete(userId);
-        res.send("User deleted successfully");
-
-    }catch(err){
-        res.status(400).send("something wernt wrong");
-    }
-
-
-});
-app.patch("/user/:userId",async(req,res)=>{
-    const userId = req.params.userId;
-    const data = req.body;
-    
-     try{
-       const ALLOWED_UPDATES =["photoUrl","firstName","lastName","age","about","gender","skills"];
-     const isUpdatedAllowed = Object.keys(data).every((k)=>
- ALLOWED_UPDATES.includes(k)
-     )
-     if(!isUpdatedAllowed){
-        throw new Error("Update not  allowed");
-
-     }
-  
-     if(data?.skills.length > 10){
-        throw new Error("skills is not  more than 10");
-     }
+app.use("/",authRouter);
+app.use("/",profileRouter);
+app.use("/",requestsRouter);
 
 
 
 
 
 
-        const user = await User.findByIdAndUpdate({_id:userId},data,{
-            runValidators:true,
-        });
 
-        res.send("User update successfully");
-     }catch(err){
-        res.status(400).send("Update failed" +err.message);
-     }
-});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
