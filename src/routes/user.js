@@ -94,7 +94,7 @@ userRouter.get("/feed",userAuth,async(req,res)=>{
         .skip(skip)
         .limit(limit);
     
-        res.send({data:users});
+        res.send({data:users});//standaad way to erite the data
 
 
 
@@ -111,3 +111,6 @@ userRouter.get("/feed",userAuth,async(req,res)=>{
 
 module.exports = userRouter;
 //you cannot compare the two mongo ids like this ===//wrong way
+//notes /feed?page=1&limit=10 =>1-10 =>.skip(0) & limit(10)
+//      page 2&limit=10 11-20 =>.skip(10 )&.limit(10)
+//skip  1*10
